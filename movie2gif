@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+MYPATH=`dirname $(readlink -f $0)`
+
+if [ "$1" = "" ]
+then
+  MYNAME=`basename $(readlink -f $0)`
+  echo "$MYNAME <movie> [movie ...]"
+  exit 1
+fi
+
+for item in $@
+do
+  filename=$(readlink -f $item)
+
+  if [ ! -f "$filename" ]
+  then
+    echo "Could not find '{$filename}'"
+    exit 2
+  fi
+
+  filepath=$(dirname "$filename")
+  basename=$(basename "$filename")
+  name="${basename%.*}"
+  palette="${filepath}"/"${name}_palette.png"
+
+  filters="fps=15"
+
+  ffmpeg -v warning -i "$filename" -vf "$filters,palettegen" -y "$palette"
+  ffmpeg -v warning -i "$filename" -i "$palette" -lavfi "$filters [x]; [x][1:v] paletteuse" -y "${filepath}/${name}.gif"
+  rm -v "$palette"
+done

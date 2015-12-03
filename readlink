@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ "$1" = "-f" ]
+then
+  echo $(perl -e 'use Cwd "abs_path";print abs_path(shift)' $2)
+else
+  /usr/bin/readlink $@
+fi
